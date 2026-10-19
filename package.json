@@ -1,0 +1,9 @@
+{
+  "name": "hireflow-ats",
+  "version": "1.0.0",
+  "description": "Mini Applicant Tracking System - Express + SQLite + vanilla JS",
+  "main": "server.js",
+  "scripts": { "start": "node server.js", "test": "node --test" },
+  "engines": { "node": ">=22.5" },
+  "dependencies": { "express": "^4.19.2" }
+}

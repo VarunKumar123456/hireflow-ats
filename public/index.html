@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>HireFlow – Mini ATS</title>
+<style>
+:root{box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);--bg:#f6f7fb;--card:#fff;--tx:#14162b;--mu:#6b7090;--bd:#e3e5f0;--ac:#4f46e5;--ac2:#eef0ff;--ok:#12a150;--bad:#dc3545}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#0e1020;--card:#171a30;--tx:#eceefb;--mu:#9a9fc4;--bd:#2a2e4d;--ac:#818cf8;--ac2:#232852;--ok:#34d399;--bad:#f87171}}
+:root[data-theme="dark"]{--bg:#0e1020;--card:#171a30;--tx:#eceefb;--mu:#9a9fc4;--bd:#2a2e4d;--ac:#818cf8;--ac2:#232852;--ok:#34d399;--bad:#f87171}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--tx);font:14px/1.45 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+header{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;background:var(--card);border-bottom:1px solid var(--bd);display:flex;flex-wrap:wrap;gap:10px;align-items:center;padding:10px 16px}
+h1{font-size:18px;margin:0;margin-right:auto;display:flex;gap:8px;align-items:center}
+h1 span{background:var(--ac);color:#fff;border-radius:8px;padding:2px 8px;font-size:13px}
+nav{display:flex;gap:4px;background:var(--bg);padding:3px;border-radius:10px}
+nav button{border:0;background:none;color:var(--mu);padding:6px 12px;border-radius:8px;cursor:pointer;font:inherit;font-weight:600}
+nav button.on{background:var(--card);color:var(--ac);box-shadow:0 1px 3px #0002}
+button,input,select,textarea{font:inherit;color:var(--tx)}
+.btn{background:var(--ac);color:#fff;border:0;border-radius:8px;padding:8px 14px;cursor:pointer;font-weight:600}
+.btn.g{background:var(--card);color:var(--tx);border:1px solid var(--bd)}
+.btn.d{background:var(--bad)}
+main{padding:16px;max-width:1500px;margin:auto}
+.bar{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:14px}
+.bar input,.bar select{background:var(--card);border:1px solid var(--bd);border-radius:8px;padding:8px 10px}
+.bar input{flex:1;min-width:180px}
+.board{display:grid;grid-auto-flow:column;grid-auto-columns:minmax(230px,1fr);gap:12px;overflow-x:auto;padding-bottom:8px}
+.col{background:var(--ac2);border-radius:12px;padding:10px;min-height:200px}
+.col.over{outline:2px dashed var(--ac)}
+.col h3{margin:0 0 8px;font-size:12px;text-transform:uppercase;letter-spacing:.05em;color:var(--mu);display:flex;justify-content:space-between}
+.card{background:var(--card);border:1px solid var(--bd);border-radius:10px;padding:10px;margin-bottom:8px;cursor:grab}
+.card b{display:block}.card small{color:var(--mu)}
+.tag{display:inline-block;background:var(--ac2);color:var(--ac);border-radius:6px;padding:1px 7px;font-size:11px;margin:4px 4px 0 0;font-weight:600}
+.wrap{overflow-x:auto;background:var(--card);border:1px solid var(--bd);border-radius:12px}
+table{border-collapse:collapse;width:100%;min-width:680px}
+th,td{text-align:left;padding:10px 12px;border-bottom:1px solid var(--bd)}
+th{color:var(--mu);font-size:12px;text-transform:uppercase}
+tr.r{cursor:pointer}tr.r:hover{background:var(--ac2)}
+.kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;margin-bottom:16px}
+.kpi,.panel{background:var(--card);border:1px solid var(--bd);border-radius:12px;padding:14px}
+.kpi b{font-size:26px;display:block}.kpi span{color:var(--mu);font-size:12px}
+.grid2{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:12px}
+.panel h3{margin:0 0 10px;font-size:14px}
+.row{display:grid;grid-template-columns:90px 1fr 70px;gap:8px;align-items:center;margin:6px 0;font-size:13px}
+.track{background:var(--ac2);border-radius:6px;height:12px;overflow:hidden}.fill{background:var(--ac);height:100%}
+dialog{border:1px solid var(--bd);border-radius:14px;background:var(--card);color:var(--tx);width:min(560px,94vw);padding:18px}
+dialog::backdrop{background:#0008}
+label{display:block;font-size:12px;color:var(--mu);margin-top:10px;font-weight:600}
+dialog input,dialog select,dialog textarea{width:100%;background:var(--bg);border:1px solid var(--bd);border-radius:8px;padding:8px;margin-top:3px}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.err{color:var(--bad);font-size:12px;min-height:16px;margin-top:6px}
+.hist{font-size:12px;color:var(--mu);margin:8px 0 0;padding-left:16px}
+.empty{text-align:center;color:var(--mu);padding:30px}
+.pill{padding:2px 9px;border-radius:99px;font-size:11px;font-weight:700;background:var(--ac2);color:var(--ac)}
+.pill.Hired{background:#12a15022;color:var(--ok)}.pill.Rejected{background:#dc354522;color:var(--bad)}
+#toast{position:fixed;bottom:calc(16px + env(safe-area-inset-bottom,0px));left:50%;transform:translateX(-50%);background:var(--tx);color:var(--bg);padding:8px 16px;border-radius:8px;opacity:0;transition:.25s;pointer-events:none}
+#toast.on{opacity:1}
+</style>
+</head>
+<body>
+<header>
+<h1><span>HF</span> HireFlow ATS</h1>
+<nav id="nav"><button data-v="dash">Dashboard</button><button data-v="board">Pipeline</button><button data-v="list">Candidates</button></nav>
+<button class="btn g" id="theme" title="Toggle theme">◐</button>
+<button class="btn g" id="exp">Export CSV</button>
+<button class="btn" id="add">+ Add candidate</button>
+</header>
+<main id="app"></main>
+<dialog id="dlg"><form id="f" method="dialog"></form></dialog>
+<div id="toast"></div>
+<script>
+const STAGES=['Applied','Screening','Interview','Offer','Hired','Rejected'];
+const ROLES=['Full Stack Developer','Frontend Developer','Backend Developer','Data Analyst','UI/UX Designer','QA Engineer'];
+const SOURCES=['LinkedIn','Referral','Job Portal','Campus','Website'];
+const KEY='hireflow.v1';
+const $=s=>document.querySelector(s);
+const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const day=n=>new Date(Date.now()-n*864e5).toISOString();
+const uid=()=>Math.random().toString(36).slice(2,9);
+function seed(){const d=[['Ananya Rao','Full Stack Developer','LinkedIn','Offer',2,12],['Rohit Sharma','Backend Developer','Referral','Interview',3,9],['Meera Nair','Frontend Developer','Job Portal','Screening',1,6],['Kiran Patel','Data Analyst','Campus','Applied',0,2],['Sneha Iyer','UI/UX Designer','Website','Hired',4,20],['Arjun Das','QA Engineer','LinkedIn','Rejected',2,14],['Divya Menon','Full Stack Developer','Referral','Interview',2,8],['Vikram Singh','Backend Developer','Job Portal','Applied',0,1],['Pooja Reddy','Frontend Developer','Campus','Screening',1,5],['Imran Khan','Full Stack Developer','Website','Applied',0,3]];
+return d.map(([name,role,source,stage,exp,age],i)=>{const si=STAGES.indexOf(stage);const path=stage==='Rejected'?['Applied','Screening','Rejected']:STAGES.slice(0,si+1);
+return{id:uid(),name,email:name.toLowerCase().replace(' ','.')+'@mail.com',phone:'98765'+(10000+i*137),role,source,exp,skills:'React, Node.js, SQL',notes:'',stage,created:day(age),history:path.map((s,k)=>({stage:s,at:day(Math.max(0,age-k))}))}})}
+let cands,view='dash',q='',fS='',fR='',sort='new';
+cands=[];
+const api=async(p,m='GET',b)=>{const r=await fetch('/api'+p,{method:m,headers:{'Content-Type':'application/json'},body:b?JSON.stringify(b):undefined});const j=await r.json().catch(()=>({}));if(!r.ok)throw new Error(j.error||'Request failed');return j};
+const load=async()=>{cands=await api('/candidates');render()};
+function toast(m){const t=$('#toast');t.textContent=m;t.classList.add('on');setTimeout(()=>t.classList.remove('on'),1800)}
+function filtered(){const t=q.trim().toLowerCase();let r=cands.filter(c=>(!fS||c.stage===fS)&&(!fR||c.role===fR)&&(!t||[c.name,c.email,c.role,c.skills,c.source,c.phone].join(' ').toLowerCase().includes(t)));
+const s={new:(a,b)=>b.created.localeCompare(a.created),old:(a,b)=>a.created.localeCompare(b.created),name:(a,b)=>a.name.localeCompare(b.name),exp:(a,b)=>b.exp-a.exp}[sort];return r.sort(s)}
+const fmt=d=>new Date(d).toLocaleDateString('en-IN',{day:'numeric',month:'short'});
+function bar(){return`<div class="bar"><input id="q" placeholder="Search name, email, role, skill…" value="${esc(q)}"><select id="fs"><option value="">All stages</option>${STAGES.map(s=>`<option ${fS===s?'selected':''}>${s}</option>`).join('')}</select><select id="fr"><option value="">All roles</option>${ROLES.map(s=>`<option ${fR===s?'selected':''}>${s}</option>`).join('')}</select><select id="so">${[['new','Newest'],['old','Oldest'],['name','Name A–Z'],['exp','Experience']].map(([v,l])=>`<option value="${v}" ${sort===v?'selected':''}>${l}</option>`).join('')}</select></div>`}
+function dash(){const n=cands.length,cnt=s=>cands.filter(c=>c.stage===s).length;
+const reached=s=>cands.filter(c=>c.history.some(h=>h.stage===s)).length;
+const active=cands.filter(c=>!['Hired','Rejected'].includes(c.stage)).length;
+const wk=cands.filter(c=>Date.now()-new Date(c.created)<7*864e5).length;
+const pct=(a,b)=>b?Math.round(a/b*100)+'%':'–';
+const grp=(k,list)=>list.map(x=>[x,cands.filter(c=>c[k]===x).length]).filter(x=>x[1]).sort((a,b)=>b[1]-a[1]);
+const bars=(rows,max)=>rows.map(([l,v,extra])=>`<div class="row"><span>${esc(l)}</span><div class="track"><div class="fill" style="width:${max?v/max*100:0}%"></div></div><b>${v}${extra||''}</b></div>`).join('');
+const fun=['Applied','Screening','Interview','Offer','Hired'].map(s=>[s,reached(s)]);
+const fr=fun.map(([s,v],i)=>[s,v,i?` <small style="color:var(--mu)">${pct(v,fun[i-1][1])}</small>`:'']);
+const src=grp('source',SOURCES),rl=grp('role',ROLES);
+return`<div class="kpis"><div class="kpi"><b>${n}</b><span>Total candidates</span></div><div class="kpi"><b>${active}</b><span>Active in pipeline</span></div><div class="kpi"><b>${wk}</b><span>New this week</span></div><div class="kpi"><b>${cnt('Hired')}</b><span>Hired</span></div><div class="kpi"><b>${cnt('Rejected')}</b><span>Rejected</span></div><div class="kpi"><b>${pct(cnt('Hired'),n)}</b><span>Hire rate</span></div></div>
+<div class="grid2"><div class="panel"><h3>Current stage breakdown</h3>${bars(STAGES.map(s=>[s,cnt(s)]),Math.max(1,...STAGES.map(cnt)))}</div>
+<div class="panel"><h3>Funnel conversion</h3>${bars(fr,Math.max(1,fun[0][1]))}</div>
+<div class="panel"><h3>By source</h3>${bars(src,src[0]?.[1])||'<div class="empty">No data</div>'}</div>
+<div class="panel"><h3>By role</h3>${bars(rl,rl[0]?.[1])||'<div class="empty">No data</div>'}</div></div>`}
+function board(){const r=filtered();return bar()+`<div class="board">${STAGES.map(s=>{const l=r.filter(c=>c.stage===s);return`<div class="col" data-s="${s}"><h3>${s}<span>${l.length}</span></h3>${l.map(c=>`<div class="card" draggable="true" data-id="${c.id}"><b>${esc(c.name)}</b><small>${esc(c.role)}</small><br><span class="tag">${esc(c.source)}</span><span class="tag">${c.exp} yr</span></div>`).join('')||'<small style="color:var(--mu)">Drop here</small>'}</div>`}).join('')}</div>`}
+function list(){const r=filtered();return bar()+`<div class="wrap"><table><thead><tr><th>Name</th><th>Role</th><th>Stage</th><th>Source</th><th>Exp</th><th>Applied</th></tr></thead><tbody>${r.map(c=>`<tr class="r" data-id="${c.id}"><td><b>${esc(c.name)}</b><br><small>${esc(c.email)}</small></td><td>${esc(c.role)}</td><td><span class="pill ${c.stage}">${c.stage}</span></td><td>${esc(c.source)}</td><td>${c.exp} yr</td><td>${fmt(c.created)}</td></tr>`).join('')}</tbody></table>${r.length?'':'<div class="empty">No candidates match your search.</div>'}</div>`}
+function render(){document.querySelectorAll('#nav button').forEach(b=>b.classList.toggle('on',b.dataset.v===view));$('#app').innerHTML={dash,board,list}[view]();
+const qi=$('#q');if(qi&&document.activeElement===document.body&&q){qi.focus();qi.setSelectionRange(q.length,q.length)}}
+async function move(id,s){const c=cands.find(x=>x.id===id);if(!c||c.stage===s)return;try{await api('/candidates/'+id+'/stage','PATCH',{stage:s});await load();toast(`${c.name} → ${s}`)}catch(e){toast(e.message)}}
+function open(id){const c=cands.find(x=>x.id===id)||{stage:'Applied',role:ROLES[0],source:SOURCES[0],exp:0};const e=!!c.id;const o=(a,v)=>a.map(x=>`<option ${x===v?'selected':''}>${x}</option>`).join('');
+$('#f').innerHTML=`<h2 style="margin:0">${e?'Edit candidate':'Add candidate'}</h2><div class="two"><div><label>Name *</label><input name="name" value="${esc(c.name)}"></div><div><label>Email *</label><input name="email" type="email" value="${esc(c.email)}"></div><div><label>Phone</label><input name="phone" value="${esc(c.phone)}"></div><div><label>Experience (years)</label><input name="exp" type="number" min="0" max="50" step="0.5" value="${c.exp}"></div><div><label>Role</label><select name="role">${o(ROLES,c.role)}</select></div><div><label>Source</label><select name="source">${o(SOURCES,c.source)}</select></div></div><label>Stage</label><select name="stage">${o(STAGES,c.stage)}</select><label>Skills</label><input name="skills" value="${esc(c.skills)}"><label>Notes</label><textarea name="notes" rows="3">${esc(c.notes)}</textarea><div class="err" id="err"></div>${e?`<ul class="hist">${c.history.map(h=>`<li>${h.stage} · ${fmt(h.at)}</li>`).join('')}</ul>`:''}<div style="display:flex;gap:8px;margin-top:12px"><button class="btn" value="ok">Save</button><button class="btn g" type="button" id="cx">Cancel</button>${e?'<button class="btn d" type="button" id="del" style="margin-left:auto">Delete</button>':''}</div>`;
+const d=$('#dlg');d.showModal();$('#cx').onclick=()=>d.close();if(e)$('#del').onclick=()=>{if(confirm('Delete '+c.name+'?')){api('/candidates/'+id,'DELETE').then(load).then(()=>{d.close();toast('Deleted')}).catch(x=>toast(x.message))}};
+$('#f').onsubmit=ev=>{ev.preventDefault();const v=Object.fromEntries(new FormData($('#f')));v.name=v.name.trim();v.email=v.email.trim().toLowerCase();
+const er=m=>{$('#err').textContent=m};if(!v.name)return er('Name is required.');if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v.email))return er('Enter a valid email.');
+if(cands.some(x=>x.email===v.email&&x.id!==id))return er('A candidate with this email already exists.');
+v.exp=Math.max(0,+v.exp||0);api(e?'/candidates/'+id:'/candidates',e?'PUT':'POST',v).then(load).then(()=>{d.close();toast('Saved')}).catch(x=>er(x.message))}}
+document.addEventListener('click',e=>{const t=e.target;if(t.closest('#nav button'))view=t.closest('button').dataset.v,render();else if(t.closest('[data-id]')&&!t.closest('dialog'))open(t.closest('[data-id]').dataset.id)});
+document.addEventListener('input',e=>{if(e.target.id==='q'){q=e.target.value;render();const i=$('#q');i.focus();i.setSelectionRange(q.length,q.length)}});
+document.addEventListener('change',e=>{const m={fs:v=>fS=v,fr:v=>fR=v,so:v=>sort=v}[e.target.id];if(m){m(e.target.value);render()}});
+let drag;document.addEventListener('dragstart',e=>{drag=e.target.dataset?.id});
+document.addEventListener('dragover',e=>{const c=e.target.closest?.('.col');if(c){e.preventDefault();document.querySelectorAll('.col').forEach(x=>x.classList.toggle('over',x===c))}});
+document.addEventListener('drop',e=>{const c=e.target.closest?.('.col');if(c&&drag){e.preventDefault();move(drag,c.dataset.s)}drag=null});
+document.addEventListener('dragend',()=>document.querySelectorAll('.col').forEach(x=>x.classList.remove('over')));
+$('#add').onclick=()=>open();
+$('#theme').onclick=()=>{const r=document.documentElement,dk=getComputedStyle(r).getPropertyValue('--bg').trim()==='#0e1020';r.dataset.theme=dk?'light':'dark'};
+$('#exp').onclick=()=>{const rows=[['Name','Email','Phone','Role','Source','Experience','Stage','Skills','Applied','Notes'],...filtered().map(c=>[c.name,c.email,c.phone,c.role,c.source,c.exp,c.stage,c.skills,c.created.slice(0,10),c.notes])];
+const csv=rows.map(r=>r.map(x=>'"'+String(x??'').replace(/"/g,'""')+'"').join(',')).join('\n');const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([csv],{type:'text/csv'}));a.download='candidates.csv';a.click()};
+load().catch(()=>{$('#app').innerHTML='<div class="empty">Cannot reach the API. Start the server with npm start.</div>'});
+</script>
+</body>
+</html>
